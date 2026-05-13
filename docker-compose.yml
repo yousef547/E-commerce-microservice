@@ -1,0 +1,104 @@
+services:
+  catalog.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    build:
+      context: .
+      dockerfile: services/catalog/Catalog.API/Dockerfile
+    ports:
+     - "6000:8080"
+    depends_on:
+     - catalogdb
+    environment:
+    - ASPNERCORE_URLS=http://+:8000
+    - DatabaseSetting__ConnectionString=mongodb://catalogdb:27017
+    - DatabaseSetting__DatabaseName=CatalogDb
+    - DatabaseSetting__BrandsCollection=Brands
+    - DatabaseSetting__TypesCollection=Types
+    - DatabaseSetting__ProductsCollection=Products
+ 
+  catalogdb:
+     image: mongo
+     container_name: catalogdb
+     ports: 
+      - "27018:27017"
+     volumes:
+        - catalogdata:/data/db
+  basketdb:
+    image: redis:alpine
+    container_name: basketdb
+    restart: always
+    ports:
+       - "6379:6379" 
+  discountdb:
+     image: postgres:14
+     container_name: discountdb
+     environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Password@1
+      - POSTGRES_DB=DiscountDb
+     restart: always
+     ports:
+      - "5432:5432"
+     volumes: 
+      - postgres_data:/var/lib/postgresql/data
+     healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d DiscountDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@eCommerce.net
+      - PGADMIN_DEFAULT_PASSWORD=Password@1
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+
+  basket.api:
+    image: ${DOCKER_REGISTRY-}basketapi
+    build:
+      context: .
+      dockerfile: services/basket/Basket.API/Dockerfile
+    ports:
+     - "6001:8080"
+    depends_on:
+     - basketdb
+    environment:
+     - ASPNERCORE_URLS=http://+:8000
+     - CacheSettings__ConnectionString=basketdb:6379
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - "8000:8000"
+      - "9999:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  discount.api:
+    image: ${DOCKER_REGISTRY-}discountapi
+    build:
+      context: .
+      dockerfile: services/discount/Discount.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings__ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=Password@1;"
+    depends_on:
+      discountdb:
+           condition: service_healthy
+    ports:
+     - "6002:8000"
+volumes:
+  catalogdata:
+  portainer_data:
+  postgres_data:  
+  pgadmin_data:
+
+
+

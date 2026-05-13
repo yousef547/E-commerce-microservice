@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/services/" />
+  <Folder Name="/services/basket/">
+    <Project Path="services/basket/Basket.API/Basket.API.csproj" Id="924e38e9-96a8-45f2-af85-314f80e4fe3f" />
+    <Project Path="services/basket/Basket.Application/Basket.Application.csproj" Id="98de40d1-184a-4471-8579-0d171672a368" />
+    <Project Path="services/basket/Basket.Core/Basket.Core.csproj" Id="e08b21af-1d67-4239-8053-e56cf5c31f4a" />
+    <Project Path="services/basket/Basket.Infrastructure/Basket.Infrastructure.csproj" Id="c2e64737-4a1b-4840-8d91-4b2238714bb7" />
+  </Folder>
+  <Folder Name="/services/catalog/">
+    <Project Path="services/catalog/Catalog.API/Catalog.API.csproj" Id="eee46915-4b72-4061-9e36-461b1c68b8c0" />
+    <Project Path="services/catalog/Catalog.Application/Catalog.Application.csproj" Id="6808d3d2-85b1-43cd-a126-bb8441dfed0a" />
+    <Project Path="services/catalog/Catalog.Core/Catalog.Core.csproj" Id="9394566d-32ac-4d50-b891-f09e53cdb263" />
+    <Project Path="services/catalog/Catalog.Infrastructure/Catalog.Infrastructure.csproj" Id="83d60453-7c25-4dce-959e-47230c5e511b" />
+  </Folder>
+  <Folder Name="/services/discount/">
+    <Project Path="services/discount/Discount.API/Discount.API.csproj" Id="ef9f95e9-48a5-470a-8625-d0f5a57500c6" />
+    <Project Path="services/discount/Discount.Application/Discount.Application.csproj" Id="28e20b11-7fbc-4115-9e4e-4be7c1b5df62" />
+    <Project Path="services/discount/Discount.Core/Discount.Core.csproj" Id="575a4a30-ca81-4eb6-a468-19efdf6d0539" />
+    <Project Path="services/discount/Discount.Infrastructure/Discount.Infrastructure.csproj" Id="945b5ce5-13e7-4052-aee1-83bd1aeba9b7" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>
