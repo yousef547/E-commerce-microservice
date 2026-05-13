@@ -87,8 +87,17 @@ jobs:
     services:
       postgres:
         image: postgres:14
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: Password@1
+          POSTGRES_DB: DiscountDb
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U admin -d DiscountDb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
