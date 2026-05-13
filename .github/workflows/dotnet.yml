@@ -85,7 +85,7 @@ jobs:
   discount:
     runs-on: ubuntu-latest
     services:
-      redis:
+      postgres:
         image: postgres:14
         ports:
           - 5432:5432
@@ -95,7 +95,7 @@ jobs:
 
       - name: Show Running Containers
         run: docker ps
-        
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
