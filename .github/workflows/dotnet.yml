@@ -16,8 +16,8 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - run: dotnet restore services/catalog/catalog.csproj
-      - run: dotnet build services/catalog/catalog.csproj
+      - run: dotnet restore services/Catalog.API/Catalog.API.csproj
+      - run: dotnet build services/Catalog.API/Catalog.API.csproj
 
   basket:
     runs-on: ubuntu-latest
@@ -28,8 +28,8 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - run: dotnet restore services/basket/basket.csproj
-      - run: dotnet build services/basket/basket.csproj
+      - run: dotnet restore services/Basket.API/basket.API.csproj
+      - run: dotnet build services/Basket.API/basket.API.csproj
 
   discount:
     runs-on: ubuntu-latest
@@ -40,5 +40,5 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - run: dotnet restore services/discount/discount.csproj
-      - run: dotnet build services/discount/discount.csproj
+      - run: dotnet restore services/Discount.API/discount.API.csproj
+      - run: dotnet build services/Discount.API/discount.API.csproj
