@@ -47,6 +47,22 @@ jobs:
       - run: dotnet restore services/basket/Basket.API/Basket.API.csproj
       - run: dotnet build services/basket/Basket.API/Basket.API.csproj
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        env:
+          REPOSITORY: basket-api
+        run: |
+          docker build \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY \
+          -f services/basket/Basket.API/Dockerfile .
+
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY
+
   discount:
     runs-on: ubuntu-latest
     steps:
@@ -58,3 +74,20 @@ jobs:
 
       - run: dotnet restore services/discount/Discount.API/Discount.API.csproj
       - run: dotnet build services/discount/Discount.API/Discount.API.csproj
+
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        env:
+          REPOSITORY: discount-api
+        run: |
+          docker build \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY \
+          -f services/discount/Discount.API/Dockerfile .
+
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY
