@@ -9,7 +9,7 @@ services:
     depends_on:
      - catalogdb
     environment:
-    - ASPNERCORE_URLS=http://+:8000
+    - ASPNERCORE_URLS=http://+:8080
     - DatabaseSetting__ConnectionString=mongodb://catalogdb:27017
     - DatabaseSetting__DatabaseName=CatalogDb
     - DatabaseSetting__BrandsCollection=Brands
