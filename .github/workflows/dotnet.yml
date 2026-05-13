@@ -20,7 +20,7 @@ jobs:
 
       - name: Show Running Containers
         run: docker ps
-        
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -46,8 +46,18 @@ jobs:
 
   basket:
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show Running Containers
+        run: docker ps
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -74,9 +84,18 @@ jobs:
 
   discount:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: postgres:14
+        ports:
+          - 5432:5432
+
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show Running Containers
+        run: docker ps
+        
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
