@@ -29,7 +29,10 @@ jobs:
         env:
           REPOSITORY: catalog-api
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY .
+          docker build \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY \
+          -f services/catalog/Catalog.API/Dockerfile .
+
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY
 
   basket:
