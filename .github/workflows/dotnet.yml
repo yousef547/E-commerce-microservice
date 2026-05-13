@@ -14,10 +14,13 @@ jobs:
         image: mongo
         ports:
           - 27017:27017
-          
+
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show Running Containers
+        run: docker ps
+        
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
