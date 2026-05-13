@@ -18,7 +18,7 @@ builder.Services.AddAutoMapper(config =>
 });
 
 builder.Services.AddMediatR(cfg =>
-cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(),Assembly.GetAssembly(typeof(GetProductByIdQuery))));
+cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), Assembly.GetAssembly(typeof(GetProductByIdQuery))));
 
 builder.Services.AddScoped<ICatalogContext, CatalogContext>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -52,15 +52,10 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapGet("/", () => "Catalog API Running");
 
