@@ -3,7 +3,7 @@ name: E-commerce-microservice
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
