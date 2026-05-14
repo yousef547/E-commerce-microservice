@@ -24,14 +24,9 @@ namespace Catalog.Application.Handlers.Commends
 		}
 		public async Task<ProductResponseDto> Handle(CreateProductCommend request, CancellationToken cancellationToken)
         {
-	
-
-
-
             var productEntity = _mapper.Map<Product>(request);
             var newProduct = await _productRepository.CreateProduct(productEntity);
             var productResponse = _mapper.Map<ProductResponseDto>(newProduct);
-
             return productResponse;
         }
     }
