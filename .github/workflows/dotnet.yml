@@ -86,7 +86,7 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy Basket Service
-        run: railway up --service Basket.API
+        run: railway up --service basket
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
