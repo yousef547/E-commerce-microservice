@@ -2,8 +2,9 @@ using Basket.Application.Mappers;
 using Basket.Application.Queries;
 using Basket.Core.Repositories;
 using Basket.Infrastructure.Repositories;
-using System.Reflection;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
+using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -47,9 +48,15 @@ builder.Services.AddSwaggerGen(options =>
 }
     );
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddStackExchangeRedisCache(option =>
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    option.Configuration = builder.Configuration.GetValue<string>("RedisCacheSetting:ConnectionString");
+    var redisConnection =
+        builder.Configuration["RedisCacheSetting:ConnectionString"];
+
+    options.ConfigurationOptions =
+        ConfigurationOptions.Parse(redisConnection!);
+
+    options.ConfigurationOptions.AbortOnConnectFail = false;
 });
 
 
