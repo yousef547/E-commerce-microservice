@@ -49,7 +49,7 @@ builder.Services.AddSwaggerGen(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddStackExchangeRedisCache(option =>
 {
-    option.Configuration = builder.Configuration.GetValue<string>("CacheSettings:ConnectionString");
+    option.Configuration = builder.Configuration.GetValue<string>("RedisCacheSetting:ConnectionString");
 });
 
 
