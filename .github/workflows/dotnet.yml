@@ -82,6 +82,14 @@ jobs:
 
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY
 
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Basket Service
+        run: railway up --service Basket.API
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
   discount:
     runs-on: ubuntu-latest
     services:

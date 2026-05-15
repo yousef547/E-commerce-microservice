@@ -43,5 +43,13 @@ namespace Basket.API.Controllers
             return Ok(basket);
         }
 
+
+        [HttpGet]
+        [Route("[action]/{userName}", Name = "GetName")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<ActionResult<int>> GetName(string userName)
+        {
+            return Ok(userName);
+        }
     }
 }
