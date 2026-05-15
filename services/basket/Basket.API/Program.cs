@@ -47,6 +47,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 }
     );
+Console.WriteLine(
+    builder.Configuration["RedisCacheSetting:ConnectionString"]);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddStackExchangeRedisCache(options =>
 {
