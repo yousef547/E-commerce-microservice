@@ -85,8 +85,8 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy Basket Service
-        run: railway up --service basket
+      - name: Check Railway Auth
+        run: railway whoami
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
