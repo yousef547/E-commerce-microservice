@@ -7,6 +7,10 @@ using Discount.Grpc.Protos;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Reflection;
+
+AppContext.SetSwitch(
+    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport",
+    true);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
