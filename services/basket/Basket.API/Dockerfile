@@ -13,14 +13,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["services/basket/Basket.API/Basket.API.csproj", "services/basket/Basket.API/"]
-COPY ["services/basket/Basket.API/Basket.API.csproj", "services/basket/Basket.API/"]
 COPY ["services/basket/Basket.Application/Basket.Application.csproj", "services/basket/Basket.Application/"]
 COPY ["services/basket/Basket.Core/Basket.Core.csproj", "services/basket/Basket.Core/"]
 COPY ["services/basket/Basket.Infrastructure/Basket.Infrastructure.csproj", "services/basket/Basket.Infrastructure/"]
 RUN dotnet restore "./services/basket/Basket.API/Basket.API.csproj"
 COPY . .
 WORKDIR "/src/services/basket/Basket.API"
-RUN dotnet build "./Basket.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Basket.API.csproj" -c $BUILD_CONFIGURATION -o /app/build 
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish

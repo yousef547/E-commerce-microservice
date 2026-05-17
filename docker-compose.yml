@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: services/catalog/Catalog.API/Dockerfile
     ports:
-     - "6000:8080"
+     - "18000:8080"
     depends_on:
      - catalogdb
     environment:
@@ -64,12 +64,13 @@ services:
       context: .
       dockerfile: services/basket/Basket.API/Dockerfile
     ports:
-     - "6001:8080"
+     - "1800:8080"
     depends_on:
      - basketdb
     environment:
      - ASPNERCORE_URLS=http://+:8000
-     - CacheSettings__ConnectionString=basketdb:6379
+     - RedisCacheSetting__ConnectionString=basketdb:6379
+     - "GrpcSettings__DiscountUrl=http://discount.api:8080"
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
@@ -93,7 +94,7 @@ services:
       discountdb:
            condition: service_healthy
     ports:
-     - "6002:8000"
+     - "8002:8080"
 volumes:
   catalogdata:
   portainer_data:

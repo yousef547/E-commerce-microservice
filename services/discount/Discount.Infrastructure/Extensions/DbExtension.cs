@@ -38,7 +38,22 @@ namespace Discount.Infrastructure.Extensions
             {
                 try
                 {
+                    //var builder = new NpgsqlConnectionStringBuilder
+                    //{
+                    //    Host = "localhost",
+                    //    Port = 5432,
+                    //    Database = "DiscountDb",
+                    //    Username = "postgres",
+                    //    Password = "Password",
+                    //    SslMode = SslMode.Disable,
+                    //    Pooling = false,
+                    //    Timeout = 30,
+                    //    CommandTimeout = 30
+                    //};
+
                     using var connection = new NpgsqlConnection(config.GetValue<string>("DatabaseSettings:ConnectionString"));
+
+                    Console.WriteLine(connection);
                     connection.Open();
                     using var cmd = new NpgsqlCommand
                     {
@@ -60,6 +75,7 @@ namespace Discount.Infrastructure.Extensions
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     retry--;
                     if (retry == 0)
                     {

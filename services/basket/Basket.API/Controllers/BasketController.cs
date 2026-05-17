@@ -1,4 +1,5 @@
 ﻿using Basket.Application.Commends;
+using Basket.Application.GrpcServices;
 using Basket.Application.Queries;
 using Basket.Application.Responses;
 using MediatR;
@@ -11,9 +12,12 @@ namespace Basket.API.Controllers
     public class BasketController : BaseApiController
     {
         private readonly IMediator _mediator;
-        public BasketController(IMediator mediator)
+        private readonly DiscountGrpcService _discountGrpcService;
+
+        public BasketController(IMediator mediator,DiscountGrpcService discountGrpcService)
         {
             _mediator = mediator;
+            _discountGrpcService = discountGrpcService;
         }
 
         [HttpGet]
@@ -40,6 +44,16 @@ namespace Basket.API.Controllers
         public async Task<ActionResult<int>> DeleteBasket(string userName)
         {
             var basket = await _mediator.Send(new DeleteBasketByUserNameCommend(userName));
+            return Ok(basket);
+        }
+
+
+        [HttpGet]
+        [Route("[action]", Name = "GetDiscount")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<ActionResult<int>> GetDiscount()
+        {
+            var basket = await _discountGrpcService.GetDiscount("Egypt Adidas Quick Force Indoor Badminton Shoes");
             return Ok(basket);
         }
 

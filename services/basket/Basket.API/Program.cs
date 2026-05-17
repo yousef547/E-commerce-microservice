@@ -1,7 +1,9 @@
+using Basket.Application.GrpcServices;
 using Basket.Application.Mappers;
 using Basket.Application.Queries;
 using Basket.Core.Repositories;
 using Basket.Infrastructure.Repositories;
+using Discount.Grpc.Protos;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Reflection;
@@ -24,6 +26,10 @@ builder.Services.AddMediatR(cfg =>
 cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(),
 Assembly.GetAssembly(typeof(GetBasketByUserNameQuery))));
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddScoped<DiscountGrpcService>();
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
+    cfg => cfg.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]));
+
 builder.Services.AddApiVersioning(option =>
 {
     option.ReportApiVersions = true;
