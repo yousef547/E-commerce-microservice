@@ -155,7 +155,7 @@ jobs:
       - run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj
       - run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
-      
+
       - name: Deploy to SmarterASP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -163,6 +163,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: true
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
