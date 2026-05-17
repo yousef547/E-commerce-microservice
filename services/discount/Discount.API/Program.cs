@@ -4,6 +4,7 @@ using Discount.Application.Mapper;
 using Discount.Core.Repositories;
 using Discount.Infrastructure.Extensions;
 using Discount.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,7 +28,13 @@ builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddGrpc();
 
 builder.Services.AddOpenApi();
-
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http2;
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
