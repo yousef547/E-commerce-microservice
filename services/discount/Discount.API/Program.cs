@@ -6,7 +6,6 @@ using Discount.Infrastructure.Extensions;
 using Discount.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Reflection;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
