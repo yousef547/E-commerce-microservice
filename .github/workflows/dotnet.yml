@@ -140,11 +140,6 @@ jobs:
           SA_PASSWORD: P@ssw0rd123
         ports:
           - 1433:1433
-        options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd123' -Q 'select 1'"
-          --health-interval 10s
-          --health-timeout 10s
-          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
