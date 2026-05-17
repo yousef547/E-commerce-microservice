@@ -156,6 +156,22 @@ jobs:
       - run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
 
+
+      - name: Create app_offline.htm
+        run: echo "Site is updating..." > app_offline.htm
+
+      - name: Upload app_offline.htm
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./
+          server-dir: /ecommerce/
+          include: app_offline.htm
+
+
       - name: Deploy to SmarterASP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
