@@ -129,7 +129,6 @@ jobs:
 
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/$REPOSITORY
 
-
   ordering:
     runs-on: ubuntu-latest
     services:
