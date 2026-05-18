@@ -1,4 +1,4 @@
-name: E-commerce-microservice-ci
+name: E-commerce-microservice-basket
 
 on:
   push:

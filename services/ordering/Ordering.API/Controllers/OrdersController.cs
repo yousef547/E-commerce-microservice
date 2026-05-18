@@ -61,15 +61,6 @@ namespace Ordering.API.Controllers
         }
 
 
-        [HttpDelete(Name = "DeleteOrderName")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-        public async Task<ActionResult> DeleteOrderName([FromBody] DeleteOrderCommand command)
-        {
-            var result = await _mediator.Send(command);
-            return NoContent();
-        }
 
     }
 }
