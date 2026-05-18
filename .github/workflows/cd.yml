@@ -31,15 +31,17 @@ jobs:
       - name: Build
         run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj --no-restore
 
-      # Publish Project
+        # Publish
       - name: Publish
         run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
-      # Create app_offline.htm
-      - name: Create app_offline.htm
-        run: echo "Site is updating..." > publish/app_offline.htm
+      # Create offline folder
+      - name: Create offline folder
+        run: |
+          mkdir offline
+          echo "Site is updating..." > offline/app_offline.htm
 
-      # Upload app_offline.htm first
+      # Upload offline file first
       - name: Upload app_offline.htm
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -47,15 +49,14 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
-          local-dir: ./publish/
+          local-dir: ./offline/
           server-dir: /ecommerce/
-          dangerous-clean-slate: false
 
-      # Delete local app_offline.htm
-      - name: Delete offline file locally
-        run: find publish -name "app_offline.htm" -delete
+      # Wait IIS stop
+      - name: Wait for IIS shutdown
+        run: sleep 10
 
-      # Deploy Application Files
+      # Deploy app
       - name: Deploy App
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -65,4 +66,14 @@ jobs:
           protocol: ftp
           local-dir: ./publish/
           server-dir: /ecommerce/
-          dangerous-clean-slate: false
+          exclude: |
+            **/app_offline.htm
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+              with:
+                server: ${{ secrets.FTP_SERVER }}
+                username: ${{ secrets.FTP_USERNAME }}
+                password: ${{ secrets.FTP_PASSWORD }}
+                protocol: ftp
+                local-dir: ./publish/
+                server-dir: /ecommerce/
+                dangerous-clean-slate: false
