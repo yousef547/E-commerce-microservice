@@ -50,7 +50,15 @@ builder.Services.AddMassTransit(config =>
     config.UsingRabbitMq((ctx, cfg) =>
     {
 
-        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+        cfg.Host(
+        new Uri(builder.Configuration["EventBusSettings:HostAddress"]),
+        h =>
+        {
+            h.UseSsl(s =>
+            {
+                s.Protocol = System.Security.Authentication.SslProtocols.Tls12;
+            });
+        });
         //provide the queue name with consumer
         cfg.ReceiveEndpoint(EventBusConstant.BasketCheckoutQueue, c =>
         {
