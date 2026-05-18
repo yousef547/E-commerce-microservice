@@ -155,10 +155,13 @@ jobs:
       - run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj
       - run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
+      
+      # create offline file
       - name: Create app_offline.htm
         run: echo "Site is updating..." > publish/app_offline.htm
 
-      - name: Deploy to SmarterASP
+      # upload offline file
+      - name: Upload app_offline.htm
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -167,6 +170,27 @@ jobs:
           protocol: ftp
           local-dir: ./publish/
           server-dir: /ecommerce/
+          state-name: .ftp-state-offline
+
+      # remove offline file locally
+      - name: Remove app_offline.htm locally
+        run: rm publish/app_offline.htm
+
+      # deploy actual app
+      - name: Deploy App
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: false
+
+
+      - name: Remove app_offline.htm
+        run: rm publish/app_offline.htm
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
