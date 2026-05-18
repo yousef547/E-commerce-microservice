@@ -6,62 +6,61 @@ on:
       - master
 
 jobs:
+  ordering:
+    runs-on: ubuntu-latest
 
-ordering:
-  runs-on: ubuntu-latest
+    steps:
 
-  steps:
+      # Checkout Code
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # Checkout Code
-    - name: Checkout
-      uses: actions/checkout@v4
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    # Setup .NET
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      # Restore Packages
+      - name: Restore
+        run: dotnet restore services/ordering/Ordering.API/Ordering.API.csproj
 
-    # Restore Packages
-    - name: Restore
-      run: dotnet restore services/ordering/Ordering.API/Ordering.API.csproj
+      # Build Project
+      - name: Build
+        run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj --no-restore
 
-    # Build Project
-    - name: Build
-      run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj --no-restore
+      # Publish Project
+      - name: Publish
+        run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish --no-build
 
-    # Publish Project
-    - name: Publish
-      run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish --no-build
+      # Create app_offline.htm
+      - name: Create app_offline.htm
+        run: echo "Site is updating..." > publish/app_offline.htm
 
-    # Create app_offline.htm
-    - name: Create app_offline.htm
-      run: echo "Site is updating..." > publish/app_offline.htm
+      # Upload app_offline.htm first
+      - name: Upload app_offline.htm
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: false
 
-    # Upload app_offline.htm first
-    - name: Upload app_offline.htm
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftp
-        local-dir: ./publish/
-        server-dir: /ecommerce/
-        dangerous-clean-slate: false
+      # Delete local app_offline.htm
+      - name: Delete offline file locally
+        run: find publish -name "app_offline.htm" -delete
 
-    # Delete local app_offline.htm
-    - name: Delete offline file locally
-      run: find publish -name "app_offline.htm" -delete
-
-    # Deploy Application Files
-    - name: Deploy App
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftp
-        local-dir: ./publish/
-        server-dir: /ecommerce/
-        dangerous-clean-slate: false
+      # Deploy Application Files
+      - name: Deploy App
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: false
