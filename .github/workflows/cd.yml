@@ -8,72 +8,63 @@ on:
 
 jobs:
   ordering:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
+  if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
-    steps:
+  runs-on: ubuntu-latest
 
-      # Checkout Code
-      - name: Checkout
-        uses: actions/checkout@v4
+  steps:
 
-      # Setup .NET
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
+    # Checkout Code
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      # Restore Packages
-      - name: Restore
-        run: dotnet restore services/ordering/Ordering.API/Ordering.API.csproj
+    # Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
-      # Build Project
-      - name: Build
-        run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj --no-restore
+    # Restore Packages
+    - name: Restore
+      run: dotnet restore services/ordering/Ordering.API/Ordering.API.csproj
 
-        # Publish
-      - name: Publish
-        run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
+    # Build Project
+    - name: Build
+      run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj -c Release --no-restore
 
-      # Create offline folder
-      - name: Create offline folder
-        run: |
-          mkdir offline
-          echo "Site is updating..." > offline/app_offline.htm
+    # Publish Project
+    - name: Publish
+      run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
-      # Upload offline file first
-      - name: Upload app_offline.htm
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./offline/
-          server-dir: /ecommerce/
+    # Create offline folder
+    - name: Create offline folder
+      run: |
+        mkdir offline
+        echo "Site is updating..." > offline/app_offline.htm
 
-      # Wait IIS stop
-      - name: Wait for IIS shutdown
-        run: sleep 10
+    # Upload app_offline.htm first
+    - name: Upload app_offline.htm
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
+        local-dir: ./offline/
+        server-dir: /ecommerce/
 
-      # Deploy app
-      - name: Deploy App
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./publish/
-          server-dir: /ecommerce/
-          exclude: |
-            **/app_offline.htm
-              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-              with:
-                server: ${{ secrets.FTP_SERVER }}
-                username: ${{ secrets.FTP_USERNAME }}
-                password: ${{ secrets.FTP_PASSWORD }}
-                protocol: ftp
-                local-dir: ./publish/
-                server-dir: /ecommerce/
-                dangerous-clean-slate: false
+    # Wait IIS shutdown
+    - name: Wait for IIS shutdown
+      run: sleep 10
+
+    # Deploy App
+    - name: Deploy App
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
+        local-dir: ./publish/
+        server-dir: /ecommerce/
+        dangerous-clean-slate: true
