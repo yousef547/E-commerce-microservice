@@ -2,7 +2,7 @@ name: E-commerce-microservice-cd
 
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["E-commerce-microservice-ci"]
     types:
       - completed
 
