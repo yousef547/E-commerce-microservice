@@ -6,6 +6,10 @@ using Discount.Infrastructure.Extensions;
 using Discount.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Reflection;
+
+AppContext.SetSwitch(
+    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport",
+    true);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -32,6 +36,7 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8080, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http2;
+        listenOptions.UseHttps();
     });
 });
 var app = builder.Build();
