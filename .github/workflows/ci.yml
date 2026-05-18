@@ -1,4 +1,4 @@
-name: E-commerce-microservice
+name: E-commerce-microservice-ci
 
 on:
   push:
@@ -155,31 +155,31 @@ jobs:
       - run: dotnet build services/ordering/Ordering.API/Ordering.API.csproj
       - run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
-      - name: Create app_offline.htm
-        run: echo "Site is updating..." > publish/app_offline.htm
+      # - name: Create app_offline.htm
+      #   run: echo "Site is updating..." > publish/app_offline.htm
 
-      - name: Upload app_offline.htm
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./publish/
-          server-dir: /ecommerce/
+      # - name: Upload app_offline.htm
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      #   with:
+      #     server: ${{ secrets.FTP_SERVER }}
+      #     username: ${{ secrets.FTP_USERNAME }}
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     protocol: ftp
+      #     local-dir: ./publish/
+      #     server-dir: /ecommerce/
 
-      - name: Delete offline file locally
-        run: find publish -name "app_offline.htm" -delete
+      # - name: Delete offline file locally
+      #   run: find publish -name "app_offline.htm" -delete
 
-      - name: Deploy App
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./publish/
-          server-dir: /ecommerce/
+      # - name: Deploy App
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      #   with:
+      #     server: ${{ secrets.FTP_SERVER }}
+      #     username: ${{ secrets.FTP_USERNAME }}
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     protocol: ftp
+      #     local-dir: ./publish/
+      #     server-dir: /ecommerce/
 
    
       - name: Log in to Docker Hub

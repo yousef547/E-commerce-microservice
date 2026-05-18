@@ -1,0 +1,67 @@
+name: E-commerce-microservice-cd
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  ordering:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Checkout Code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # Restore Packages
+      - name: Restore
+        run: dotnet restore
+
+      # Build Project
+      - name: Build
+        run: dotnet build --no-restore
+
+      # Publish Project
+      - name: Publish
+        run: dotnet publish -c Release -o publish --no-build
+
+      # Create app_offline.htm
+      - name: Create app_offline.htm
+        run: echo "Site is updating..." > publish/app_offline.htm
+
+      # Upload app_offline.htm first
+      - name: Upload app_offline.htm
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: false
+
+      # Delete local app_offline.htm
+      - name: Delete offline file locally
+        run: find publish -name "app_offline.htm" -delete
+
+      # Deploy Application Files
+      - name: Deploy App
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./publish/
+          server-dir: /ecommerce/
+          dangerous-clean-slate: false
