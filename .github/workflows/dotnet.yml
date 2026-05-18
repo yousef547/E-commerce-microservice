@@ -156,9 +156,6 @@ jobs:
       - run: dotnet publish services/ordering/Ordering.API/Ordering.API.csproj -c Release -o publish
 
       - name: Create app_offline.htm
-        run: echo "Site is updating..." > app_offline.htm
-
-      - name: Create app_offline.htm
         run: echo "Site is updating..." > publish/app_offline.htm
 
       - name: Deploy to SmarterASP
@@ -170,7 +167,6 @@ jobs:
           protocol: ftp
           local-dir: ./publish/
           server-dir: /ecommerce/
-          clean: true
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
