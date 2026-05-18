@@ -1,7 +1,10 @@
+using EventBus.Messages.Common;
+using MassTransit;
+using Ordering.API.EventBusConsumer;
+using Ordering.API.Extensions;
+using Ordering.Application.Extensions;
 using Ordering.Infrastructure.Data;
 using Ordering.Infrastructure.Extensions;
-using Ordering.Application.Extensions;
-using Ordering.API.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +40,33 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplicationServices();
 
 builder.Services.AddInfraServices(builder.Configuration);
+builder.Services.AddScoped<BasketOrderingConsumer>();
+builder.Services.AddMassTransit(config =>
+{
+    //Mark this as consumer
+    config.AddConsumer<BasketOrderingConsumer>();
+    //config.AddConsumer<BasketOrderingConsumerV2>();
 
+    config.UsingRabbitMq((ctx, cfg) =>
+    {
+
+        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+        //provide the queue name with consumer
+        cfg.ReceiveEndpoint(EventBusConstant.BasketCheckoutQueue, c =>
+        {
+            c.ConfigureConsumer<BasketOrderingConsumer>(ctx);
+        });
+
+        //version 2
+        //cfg.ReceiveEndpoint(EventBusConstant.BasketCheckoutQueueV2, c =>
+        //{
+        //    c.ConfigureConsumer<BasketOrderingConsumerV2>(ctx);
+        //});
+    });
+});
+
+
+builder.Services.AddMassTransitHostedService();
 // Add services to the container.
 
 builder.Services.AddControllers();

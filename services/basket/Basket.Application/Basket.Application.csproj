@@ -13,12 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\EventBus.Messages\EventBus.Messages.csproj" />
     <ProjectReference Include="..\Basket.Core\Basket.Core.csproj" />
   </ItemGroup>
 	
 	<ItemGroup>
-		<Protobuf Include="../../discount/Discount.Application/Protos/Discount.proto"
-				  Link="Protos/Discount.proto"
-				  GrpcServices="Client" />
+		<Protobuf Include="../../discount/Discount.Application/Protos/Discount.proto" Link="Protos/Discount.proto" GrpcServices="Client" />
 	</ItemGroup>
 </Project>

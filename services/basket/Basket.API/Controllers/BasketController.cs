@@ -1,7 +1,11 @@
-﻿using Basket.Application.Commends;
+﻿using AutoMapper;
+using Basket.Application.Commends;
 using Basket.Application.GrpcServices;
 using Basket.Application.Queries;
 using Basket.Application.Responses;
+using Basket.Core.Entities;
+using EventBus.Messages.Events;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -12,12 +16,21 @@ namespace Basket.API.Controllers
     public class BasketController : BaseApiController
     {
         private readonly IMediator _mediator;
-        private readonly DiscountGrpcService _discountGrpcService;
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IMapper _mapper;
 
-        public BasketController(IMediator mediator,DiscountGrpcService discountGrpcService)
+
+        public BasketController(
+            IMediator mediator,
+            IPublishEndpoint publishEndpoint,
+            IMapper mapper
+
+            )
         {
             _mediator = mediator;
-            _discountGrpcService = discountGrpcService;
+            _publishEndpoint = publishEndpoint;
+            _mapper = mapper;
+
         }
 
         [HttpGet]
@@ -47,15 +60,39 @@ namespace Basket.API.Controllers
             return Ok(basket);
         }
 
-
-        [HttpGet]
-        [Route("[action]", Name = "GetDiscount")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<ActionResult<int>> GetDiscount()
+        [Route("[action]")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Accepted)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Checkout([FromBody] BasketCheckout basketCheckout)
         {
-            var basket = await _discountGrpcService.GetDiscount("Egypt Adidas Quick Force Indoor Badminton Shoes");
-            return Ok(basket);
+            //get basket by user name
+            var query = new GetBasketByUserNameQuery(basketCheckout.UserName);
+            var basket = await _mediator.Send(query);
+
+            if (basket == null)
+            {
+                return BadRequest();
+            }
+
+            var eventMsg = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
+            eventMsg.TotalPrice = basket.TotalPrice;
+            await _publishEndpoint.Publish(eventMsg);
+
+            //_logger.LogInformation($"Basket Published for {basket.UserName}");
+            //remove from basket
+            var deletedcmd = new DeleteBasketByUserNameCommend(basketCheckout.UserName);
+            await _mediator.Send(deletedcmd);
+            return Accepted();
         }
+        //[HttpGet]
+        //[Route("[action]", Name = "GetDiscount")]
+        //[ProducesResponseType((int)HttpStatusCode.OK)]
+        //public async Task<ActionResult<int>> GetDiscount()
+        //{
+        //    var basket = await _discountGrpcService.GetDiscount("Egypt Adidas Quick Force Indoor Badminton Shoes");
+        //    return Ok(basket);
+        //}
 
     }
 }
