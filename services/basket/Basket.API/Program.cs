@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Basket.Application.GrpcServices;
 using Basket.Application.Mappers;
 using Basket.Application.Queries;
@@ -9,6 +10,7 @@ using MassTransit;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using StackExchange.Redis;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
 AppContext.SetSwitch(
@@ -43,7 +45,12 @@ builder.Services.AddApiVersioning(option =>
     option.ReportApiVersions = true;
     option.AssumeDefaultVersionWhenUnspecified = true;
     option.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -57,6 +64,59 @@ builder.Services.AddSwaggerGen(options =>
             Name = "Yousef Mohamed",
             Email = "youaefmahmed481@gmail.com",
             Url = new Uri("https://yourwebsite")
+        }
+    });
+
+    options.SwaggerDoc("v2", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Basket API",
+        Version = "v2",
+        Description = "This is API for basket microservice v2 in ecommerce application",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Yousef Mohamed",
+            Email = "youaefmahmed481@gmail.com",
+            Url = new Uri("https://yourwebsite.eg")
+        }
+    });
+
+    options.DocInclusionPredicate((version, apiDescrption) =>
+    {
+        if (!apiDescrption.TryGetMethodInfo(out var methodInfo))
+        {
+            return false;
+        }
+
+        var versions = methodInfo.DeclaringType?
+                       .GetCustomAttributes(true)
+                       .OfType<ApiVersionAttribute>()
+                       .SelectMany(attr => attr.Versions);
+
+        return versions?.Any(v => $"v{v.ToString()}" == version) ?? false;
+
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: **Bearer {your JWT}**",
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
         }
     });
 }
@@ -91,7 +151,14 @@ var app = builder.Build();
 app.MapOpenApi();
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    // Use *relative* URLs so the /basket prefix is preserved by the browser
+    c.SwaggerEndpoint("v1/swagger.json", "Basket.API v1");   // no leading '/'
+    c.SwaggerEndpoint("v2/swagger.json", "Basket.API v2");   // no leading '/'
+    c.RoutePrefix = "swagger";
+
+}); ;
 
 app.UseAuthorization();
 
