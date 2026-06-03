@@ -3,9 +3,11 @@ using Basket.Application.Mappers;
 using Basket.Application.Queries;
 using Basket.Core.Repositories;
 using Basket.Infrastructure.Repositories;
+using Common.Logging;
 using Discount.Grpc.Protos;
 using MassTransit;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using StackExchange.Redis;
 using System.Reflection;
 
@@ -15,6 +17,7 @@ AppContext.SetSwitch(
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseSerilog(Logging.ConfigureLogger);
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

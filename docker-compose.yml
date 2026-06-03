@@ -15,6 +15,7 @@ services:
     - DatabaseSetting__BrandsCollection=Brands
     - DatabaseSetting__TypesCollection=Types
     - DatabaseSetting__ProductsCollection=Products
+    - "ElasticConfiguration__Uri=http://elasticsearch:9200"
  
   catalogdb:
      image: mongo
@@ -65,14 +66,6 @@ services:
       timeout: 10s
       retries: 3
 
-  rabbitmq:
-     image: rabbitmq:3-management-alpine
-     container_name: rabbitmq
-     restart: always
-     ports:
-       - "5672:5672"
-       - "15672:15672"
-
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -84,6 +77,36 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/root/.pgadmin
+
+  rabbitmq:
+     image: rabbitmq:3-management-alpine
+     container_name: rabbitmq
+     restart: always
+     ports:
+       - "5672:5672"
+       - "15672:15672"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"  
+
 
   basket.api:
     image: ${DOCKER_REGISTRY-}basketapi
@@ -100,13 +123,14 @@ services:
      - RedisCacheSetting__ConnectionString=basketdb:6379
      - "GrpcSettings__DiscountUrl=http://discount.api:8080"
      - "EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672"
+     - "ElasticConfiguration__Uri=http://elasticsearch:9200"
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
     restart: always
     ports:
-      - "8000:8000"
-      - "9999:9443"
+      - "18080:8000"
+      - "19443:9443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
@@ -119,11 +143,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "DatabaseSettings__ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=Password@1;"
+      - "ElasticConfiguration__Uri=http://elasticsearch:9200"
     depends_on:
       discountdb:
            condition: service_healthy
     ports:
-     - "8002:8080"
+     - "18002:8080"
   ordering.api:
     image: ${DOCKER_REGISTRY-}orderingapi
     build:
@@ -134,11 +159,12 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - "ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb2;User Id=sa;Password=P@ssw0rd123;TrustServerCertificate=True;"
       - "EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672"
+      - "ElasticConfiguration__Uri=http://elasticsearch:9200"
     depends_on:
       - orderdb
       - rabbitmq
     ports:
-     - "8003:8080"
+     - "18003:8080"
 
 volumes:
   catalogdata:
@@ -146,6 +172,7 @@ volumes:
   postgres_data:  
   pgadmin_data:
   orderdb-data:
+  elasticsearch-data:
 
 
 

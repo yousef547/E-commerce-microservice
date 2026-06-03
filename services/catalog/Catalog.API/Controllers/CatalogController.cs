@@ -11,9 +11,14 @@ namespace Catalog.API.Controllers
     public class CatalogController : BaseApiController
     {
         private readonly IMediator _mediator;
-        public CatalogController(IMediator mediator)
+        private readonly ILogger<CatalogController> _logger;
+        public CatalogController(
+            IMediator mediator,
+            ILogger<CatalogController> logger
+            )
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -33,6 +38,7 @@ namespace Catalog.API.Controllers
         public async Task<ActionResult> GetProductByBrandName(string brandName)
         {
             var result = await _mediator.Send(new GetProductByBrandQuery(brandName));
+
             return Ok(result);
         }
 
@@ -42,6 +48,7 @@ namespace Catalog.API.Controllers
         public async Task<ActionResult> GetProductByProductName(string productName)
         {
             var result = await _mediator.Send(new GetProductByName(productName));
+            _logger.LogInformation($"Product with {productName} is featched");
             return Ok(result);
         }
 

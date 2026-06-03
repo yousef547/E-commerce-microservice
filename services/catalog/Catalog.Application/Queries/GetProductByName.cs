@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Catalog.Application.Queries
 {
-    public class GetProductByName:IRequest<ProductResponseDto>
+    public class GetProductByName:IRequest<IList<ProductResponseDto>>
     {
 
         public GetProductByName(string name)
