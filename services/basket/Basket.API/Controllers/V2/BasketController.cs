@@ -13,7 +13,7 @@ using System.Net;
 namespace Basket.API.Controllers.V2
 {
     [ApiVersion("2")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v2/[controller]")]
     [ApiController]
     public class BasketController : ControllerBase
     {

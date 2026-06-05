@@ -1,0 +1,88 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/Catalog/{everything}",
+      "DownstreamPathTemplate": "/api/v1/Catalog/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "catalog.api",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "Catalog"
+    },
+
+    {
+      "UpstreamPathTemplate": "/Basket/{everything}",
+      "DownstreamPathTemplate": "/api/v1/Basket/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "basket.api",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "Basket"
+    },
+    {
+      "UpstreamPathTemplate": "/Orders/{everything}",
+      "DownstreamPathTemplate": "/api/v1/Orders/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "ordering.api",
+          "Port": 8080
+        }
+      ],
+      "SwaggerKey": "Ordering"
+    }
+  ],
+
+  "SwaggerEndPoints": [
+    {
+      "Key": "Catalog",
+      "Config": [
+        {
+          "Name": "Catalog API",
+          "Version": "v1",
+          "Url": "http://catalog.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Basket",
+      "Config": [
+        {
+          "Name": "Basket API",
+          "Version": "v1",
+          "Url": "http://basket.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Discount",
+      "Config": [
+        {
+          "Name": "Discount API",
+          "Version": "v1",
+          "Url": "http://discount.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Ordering",
+      "Config": [
+        {
+          "Name": "Ordering API",
+          "Version": "v1",
+          "Url": "http://ordering.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8010"
+  }
+}
