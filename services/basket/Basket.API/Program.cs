@@ -7,6 +7,9 @@ using Basket.Infrastructure.Repositories;
 using Common.Logging;
 using Discount.Grpc.Protos;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using StackExchange.Redis;
@@ -22,7 +25,59 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog(Logging.ConfigureLogger);
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://host.docker.internal:9009";
+        options.RequireHttpsMetadata = false;
+
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidAudience = "Basket",
+            ValidIssuer = "https://localhost:9009",
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero
+
+        };
+
+
+        //Add this to docker to host communtication
+        options.BackchannelHttpHandler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"======= AUTHENTICTION FAILED");
+                Console.WriteLine($"Exception :{context.Exception.Message}");
+                Console.WriteLine($"Authority:{options.Authority}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("TOKEN VALID");
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = context =>
+            {
+                Console.WriteLine($"CHALLENGE ERROR: {context.Error}");
+                Console.WriteLine($"DESCRIPTION: {context.ErrorDescription}");
+                return Task.CompletedTask;
+            }
+        };
+
+
+    });
+
+
+
 builder.Services.AddOpenApi();
 builder.Services.AddAutoMapper(config =>
 {
@@ -40,6 +95,14 @@ builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
     cfg => cfg.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]));
 
+
+var userPolicy = new AuthorizationPolicyBuilder()
+    .RequireAuthenticatedUser().Build();
+
+builder.Services.AddControllers(config =>
+{
+    config.Filters.Add(new AuthorizeFilter(userPolicy));
+});
 builder.Services.AddApiVersioning(option =>
 {
     option.ReportApiVersions = true;
@@ -160,6 +223,7 @@ app.UseSwaggerUI(c =>
 
 }); ;
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
