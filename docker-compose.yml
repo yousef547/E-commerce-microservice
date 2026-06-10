@@ -12,7 +12,7 @@ services:
       - discount.api
       - ordering.api
     ports:
-      - "9300:9100" 
+      - "44344:443" 
 
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
@@ -33,7 +33,7 @@ services:
     - DatabaseSetting__TypesCollection=Types
     - DatabaseSetting__ProductsCollection=Products
     - "ElasticConfiguration__Uri=http://elasticsearch:9200"
-    - Auth__Authority=http://localhost:9009
+    - Auth__Authority=http://localhost:9011
     - Auth__RequireHttpsMetadata=false
     - Auth__Audience=Catalog
   catalogdb:
@@ -143,6 +143,8 @@ services:
      - "GrpcSettings__DiscountUrl=http://discount.api:8080"
      - "EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672"
      - "ElasticConfiguration__Uri=http://elasticsearch:9200"
+     - Auth__Authority=http://localhost:9011
+     - Auth__RequireHttpsMetadata=false
   portainer:
     image: portainer/portainer-ce
     container_name: portainer

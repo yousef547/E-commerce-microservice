@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 
@@ -21,7 +22,7 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://host.docker.internal:9009";
+        options.Authority = "http://identityserver:9011";
         options.RequireHttpsMetadata = false;
 
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -29,7 +30,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidateAudience = false,
             ValidAudience = "Catalog",
-            ValidIssuer = "https://localhost:9009",
+            ValidIssuer = "http://identityserver:9011",
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ClockSkew = TimeSpan.Zero
@@ -113,6 +114,31 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://yourwebsite")
         }
     });
+
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: **Bearer {your JWT}**",
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 }
     );
 // Learn mor
@@ -120,13 +146,42 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-app.MapOpenApi();
-app.UseSwagger();
-app.UseSwaggerUI();
-app.UseAuthentication();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    // BEFORE UseSwagger / routing
+    app.Use((ctx, next) =>
+    {
+        if (ctx.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var p) && !string.IsNullOrEmpty(p))
+            ctx.Request.PathBase = p.ToString();   // e.g., "/catalog"
+        return next();
+    });
 
+    app.UseSwagger(c =>
+    {
+        // Make the OpenAPI "servers" base path match the prefix so Try it out uses /catalog/...
+        c.PreSerializeFilters.Add((doc, req) =>
+        {
+            var prefix = req.Headers["X-Forwarded-Prefix"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(prefix))
+                doc.Servers = new List<Microsoft.OpenApi.Models.OpenApiServer>
+            { new() { Url = prefix } };
+        });
+    });
+
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("v1/swagger.json", "Catalog.API v1"); // relative path (no leading '/')
+        c.RoutePrefix = "swagger";
+    });
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+// app.UseCors("CorsPolicy");
+//app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
-app.MapGet("/", () => "Catalog API Running");
 
 app.Run();

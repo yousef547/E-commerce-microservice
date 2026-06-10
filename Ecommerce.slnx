@@ -3,6 +3,10 @@
     <Project Path="APIGetway/Ocelot.APIGetway/Ocelot.APIGetway.csproj" Id="f370be24-545e-4907-9eb8-181a62ba41d7" />
   </Folder>
   <Folder Name="/APIGetway/nginx/">
+    <File Path="APIGetway/nginx/id-local.conf" />
+    <File Path="APIGetway/nginx/id-local.crt" />
+    <File Path="APIGetway/nginx/id-local.key" />
+    <File Path="APIGetway/nginx/id-local.pfx" />
     <File Path="APIGetway/nginx/nginx.Dockerfile" />
     <File Path="APIGetway/nginx/nginx.local.conf" />
   </Folder>

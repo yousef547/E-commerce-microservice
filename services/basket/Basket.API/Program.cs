@@ -9,6 +9,7 @@ using Discount.Grpc.Protos;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -28,7 +29,7 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = "https://host.docker.internal:9009";
+        options.Authority = "http://identityserver:9011";
         options.RequireHttpsMetadata = false;
 
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -36,7 +37,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidateAudience = false,
             ValidAudience = "Basket",
-            ValidIssuer = "https://localhost:9009",
+            ValidIssuer = "http://identityserver:9011",
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ClockSkew = TimeSpan.Zero
@@ -208,20 +209,36 @@ builder.Services.AddMassTransit(config =>
 builder.Services.AddMassTransitHostedService();
 
 var app = builder.Build();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 
 // Configure the HTTP request pipeline.
-
-app.MapOpenApi();
-app.UseDeveloperExceptionPage();
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-    // Use *relative* URLs so the /basket prefix is preserved by the browser
-    c.SwaggerEndpoint("v1/swagger.json", "Basket.API v1");   // no leading '/'
-    c.SwaggerEndpoint("v2/swagger.json", "Basket.API v2");   // no leading '/'
-    c.RoutePrefix = "swagger";
+    app.UseDeveloperExceptionPage();
+    app.MapOpenApi();
+    app.Use((ctx, next) =>
+    {
+        if (ctx.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var prefix) &&
+            !string.IsNullOrEmpty(prefix))
+        {
+            ctx.Request.PathBase = prefix.ToString(); // e.g., "/basket"
+        }
+        return next();
+    });
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        // Use *relative* URLs so the /basket prefix is preserved by the browser
+        c.SwaggerEndpoint("v1/swagger.json", "Basket.API v1");   // no leading '/'
+        c.SwaggerEndpoint("v2/swagger.json", "Basket.API v2");   // no leading '/'
+        c.RoutePrefix = "swagger";
 
-}); ;
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
